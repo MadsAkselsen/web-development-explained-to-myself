@@ -1,6 +1,6 @@
 # Compose
 
-Functional composition is when you take two or more functions, and make one a single function out of them.
+Functional composition is when you take two or more functions, and make a single function out of them.
 
 When you compose functions into a single function call, you can start using them as pipelines of specific behavior. These pipelines can then take the result of each function that comprises it, and use it as the argument to the next function in the pipeline.
 
