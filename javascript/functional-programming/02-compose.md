@@ -1,16 +1,104 @@
-# Custom errors, extending Error
+# Compose
 
-JavaScript allows to use `throw` with any argument, so technically our custom error classes don't need to inherit from `Error`. But if we inherit, then it becomes possible to use `obj instanceof Error` to identify error objects. So it's better to inherit from it.
+Functional composition is when you take two or more functions, and make one a single function out of them.
 
-As the application grows, our own errors naturally form a hierarchy. For instance, `HttpTimeoutError` may inherit from `HttpError`, and so on.
+When you compose functions into a single function call, you can start using them as pipelines of specific behavior. These pipelines can then take the result of each function that comprises it, and use it as the argument to the next function in the pipeline.
 
-## Extending Error
+## Example with reduce()
 
-As an example, let's consider a function `readUser(json)` that should read JSON with user data.
+The following factoryFunc() function takes in n amount of functions and runs `val` through each of them - just like factory
 
-Here's an example of how a valid `json` may look:
 ```js
-let json = `{ "name": "John", "age": 30 }`;
+const factoryFunc = (...args) => {
+  return args.reduce((f, g) => (val) => {
+    return f(g(val));
+  });
+};
 ```
 
-Internally, we'll use `JSON.parse`. If it receives malformed `json`, then it throws `SyntaxError`. But even if `json` is syntactically correct, that doesn't mean that it's a valid user, right? It may miss the necessary data. For instance, it may not have `name` and `age` properties that are essential for our users.
+```js
+const func1 = (val) => {
+  return val + 4;
+};
+
+const func2 = (val) => {
+  return val + 4;
+};
+
+const func3 = (val) => {
+  return val + 5;
+};
+
+const composed = factoryFunc(func1, func2, func3);
+
+console.log('without val:', composed);
+console.log('with val:', composed(2));
+```
+
+**First iteration:**
+
+  1. Values are inserted into the parameter of the reducer:
+  
+     ```js
+     (nothing, func1)
+     ```
+  
+     This means
+     - `f = nothing`
+     - `g = func1(val)`
+
+  2. The return of this iteration becomes:
+  
+     ```js
+     (val) => return {func1(val)}
+     ```
+
+     This return value is f (the accomulator) in the next iteration
+
+**Second iteration:**
+
+1. Values are inserted into the parameter of the reducer:
+
+     ```js
+     ((val) => return {func1(val)}, func2)
+     ```
+
+     This means
+     - `f = (val) => return {func1(val)}`
+     - `g = func2(val)`
+
+     Remember g goes into f(val): `f = (func2) => return {func1(func2)}`
+
+2. The return of this iteration becomes:
+
+      ```js
+     (val) => return {func1(func2(val))}
+     ```
+
+     This return value is f (the accomulator) in the next iteration
+
+**Third iteration:**
+
+1. Values are inserted into the parameter of the reducer:
+
+     ```js
+     ((val) => return {func1(func2(val))}, func3)
+     ```
+
+     This means
+     - `f = (val) => return {func1(func2(val))}`
+     - `g = func3(val)`
+
+     Remember g goes into f(val): `f = (func3) => return {func1(func2(func3(val)))}`
+
+2. The return of this iteration becomes:
+
+      ```js
+     (val) => return {func1(func2(func3(val)))}
+     ```
+
+The return value of `const composed = factoryFunc(func1, func2, func3)` is therefore `(val) => return {func1(func2(func3(val)))}`.
+
+`composed(2)` is therefore `(2) => return {func1(func2(func3(2)))}`
+
+## pipe
