@@ -102,3 +102,5 @@ The return value of `const composed = factoryFunc(func1, func2, func3)` is there
 `composed(2)` is therefore `(2) => return {func1(func2(func3(2)))}`
 
 ## pipe
+
+pipe controls the directional flow of compose + reduce

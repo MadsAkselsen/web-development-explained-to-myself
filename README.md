@@ -1,1 +1,1 @@
-This repo is my rubberduck and listens to me trying to explain all things web development
+This repo is my rubberduck and listens to me explaining all things web development
